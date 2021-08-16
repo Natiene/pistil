@@ -8,10 +8,11 @@ type FilterType = {
 
 //@ts-ignore
 const doSearch = ({ filterType, search }: FilterType, props) => {
+    if (search === '' || filterType === '') {
+        return
+    }
+    
     props.onSearch({
-        page: 1,
-        pages: Infinity,
-        limit: 12,
         filterType,
         search
     });

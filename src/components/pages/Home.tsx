@@ -2,57 +2,58 @@ import Search from '../search/Search';
 import Cards from '../cards/Cards';
 import { database } from '../../services/firebase';
 import { useEffect, useState } from 'react';
-import reportWebVitals from '../../reportWebVitals';
 
 type FilterType = {
-    page: number;
-    pages: number;
-    limit: number;
     filterType: string;
     search: string;
 };
 
 const initialFilter = {
-    page: 1,
-    pages: Infinity,
-    limit: 12,
     filterType: '',
     search: '',
 };
 
+type ProductType = {
+    id: number;
+    strain: string;
+};
+
+const initialProduct: ProductType = {
+    id: 1,
+    strain: '',
+};
+
 export function Home() {
     const [products, setProducts] = useState([]);
-    const [filter, setFilter] = useState({ ...initialFilter });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(12);
+    const [lastProduct, setLastProduct] = useState(initialProduct);
+
+    const clearState = () => {
+        setProducts([]);
+        setCurrentPage(1)
+        console.log("aqui")
+    };
 
     const handlerProducts = (filter: FilterType) => {
-        let data = null;
+        clearState();
+        const search =
+            filter.filterType === 'weight_grams'
+                ? parseFloat(filter.search)
+                : filter.search;
 
-        console.log('filter ', filter);
-
-        if (!filter.filterType) {
-            data = database.ref().limitToFirst(filter.limit).get();
-        } else {
-            if (filter.filterType === 'weight_grams') {
-                data = database
-                    .ref()
-                    .orderByChild(filter.filterType)
-                    .equalTo(parseFloat(filter.search))
-                    .limitToFirst(filter.limit)
-                    .get();
-            } else {
-                data = database
-                    .ref()
-                    .orderByChild(filter.filterType)
-                    .equalTo(filter.search)
-                    .limitToFirst(filter.limit)
-                    .get();
-            }
-        }
+        const data = database
+            .ref()
+            .orderByChild(filter.filterType)
+            .equalTo(search)
+            .limitToFirst(limit)
+            // .endAt(limit+limit)
+            .get();
 
         data.then((response) => {
-            console.log('debug responde', response.val());
             if (!Array.isArray(response.val())) {
                 const res = response.val();
+                //@ts-ignore
                 const aux = [];
                 for (const key in res) {
                     aux.push(res[key]);
@@ -68,14 +69,56 @@ export function Home() {
     };
 
     useEffect(() => {
-        handlerProducts(initialFilter);
-    }, []);
+        let data;
+        // if (!('id' in lastProduct)) {
+        if (lastProduct.id === 1) {
+            data = database.ref().limitToFirst(limit).get();
+        } else {
+            data = database
+                .ref()
+                .limitToFirst(limit)
+                .get();
+        }
+
+        data.then((response) => {
+            const products = response.val();
+
+            if (!products) {
+                return;
+            }
+
+            const lastProduct = products[products.length - 1];
+
+            setLastProduct(lastProduct);
+            //@ts-ignore
+            setProducts((prevProducts) => [...prevProducts, ...products]);
+        });
+    }, [currentPage]);
+
+    useEffect(() => {
+        const sentinela = document.querySelector('#sentinela');
+
+        if (!sentinela) {
+            return;
+        }
+        const intersectionObserver = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                setCurrentPage(
+                    (currentPageInsideState) => currentPageInsideState + 1
+                );
+            }
+        });
+
+        intersectionObserver.observe(sentinela);
+
+        return () => intersectionObserver.disconnect();
+    }, [products]);
 
     return (
         <div className="container content-center m-8 md:mx-auto">
+            currentPage {currentPage}
             <Search onSearch={handlerProducts} />
-
-            <Cards param={products} />
+            <Cards param={products}  currentPage={currentPage}/>
         </div>
     );
 }
