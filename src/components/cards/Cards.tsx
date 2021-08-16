@@ -53,7 +53,7 @@ export default function Cards({ param, currentPage }: CardsType) {
                     </li>
                 ))}
                 {param.length > 1 && (
-                    <li id="sentinela" className="p-5 bg-red-500"></li>
+                    <li id="sentinela"></li>
                 )}
             </ul>
         </>

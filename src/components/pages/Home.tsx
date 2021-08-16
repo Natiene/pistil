@@ -31,8 +31,7 @@ export function Home() {
 
     const clearState = () => {
         setProducts([]);
-        setCurrentPage(1)
-        console.log("aqui")
+        setCurrentPage(1);
     };
 
     const handlerProducts = (filter: FilterType) => {
@@ -74,10 +73,7 @@ export function Home() {
         if (lastProduct.id === 1) {
             data = database.ref().limitToFirst(limit).get();
         } else {
-            data = database
-                .ref()
-                .limitToFirst(limit)
-                .get();
+            data = database.ref().limitToFirst(limit).get();
         }
 
         data.then((response) => {
@@ -116,9 +112,9 @@ export function Home() {
 
     return (
         <div className="container content-center m-8 md:mx-auto">
-            currentPage {currentPage}
+            Current Page = {currentPage}
             <Search onSearch={handlerProducts} />
-            <Cards param={products}  currentPage={currentPage}/>
+            <Cards param={products} currentPage={currentPage} />
         </div>
     );
 }
