@@ -2,7 +2,7 @@ interface IProduct {
     brand: string;
     category: string;
     strain: string;
-    strainType: string;
+    strain_type: string;
     weight_grams: number;
     placeholder_img: string;
     id: number;
@@ -10,9 +10,10 @@ interface IProduct {
 
 type CardsType = {
     param: Array<IProduct>;
+    currentPage: number;
 };
 
-export default function Cards({ param }: CardsType) {
+export default function Cards({ param, currentPage }: CardsType) {
     return Array.isArray(param) ? (
         <>
             <ul
@@ -22,7 +23,7 @@ export default function Cards({ param }: CardsType) {
                 {param.map((item) => (
                     <li
                         key={item.id}
-                        className="flex flex-col col-span-1 text-center bg-white divide-y divide-gray-200 rounded-lg shadow"
+                        className="flex flex-col col-span-1 text-center bg-gray-100 divide-y divide-gray-200 rounded-lg shadow-xl "
                     >
                         <div className="flex flex-col flex-1 p-8">
                             <img
@@ -30,22 +31,30 @@ export default function Cards({ param }: CardsType) {
                                 src={item.placeholder_img}
                                 alt=""
                             />
-                            <h3 className="mt-6 text-sm font-medium text-gray-900">
-                                {item.category}
-                            </h3>
-                            <dl className="flex flex-col justify-between flex-grow mt-1">
-                                <dd className="text-sm text-gray-500">
+
+                            <h3 className="mt-6 text-sm font-medium text-white">
+                                <span className="px-1 py-1 bg-yellow-400 rounded-md">
                                     {item.strain}
-                                </dd>
-                                <dd className="mt-3">
-                                    <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                                        {item.weight_grams}
-                                    </span>
-                                </dd>
-                            </dl>
+                                </span>
+                            </h3>
+                            <div className="mt-1 text-sm font-medium text-gray-500">
+                                {item.strain_type}
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">
+                                {item.brand}
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">
+                                {item.category}
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">
+                                {item.weight_grams} grams
+                            </div>
                         </div>
                     </li>
                 ))}
+                {param.length > 1 && (
+                    <li id="sentinela" className="p-5 bg-red-500"></li>
+                )}
             </ul>
         </>
     ) : null;
